@@ -288,6 +288,11 @@ workflow PHOENIX_EXQC {
     )
     ch_versions = ch_versions.mix(FASTANI.out.versions)
 
+    //Create JSON of ANI output
+    JSON_CREATOR (
+        FORMAT_ANI.out.ani
+    )
+
     // Reformat ANI headers
     FORMAT_ANI (
         FASTANI.out.ani
