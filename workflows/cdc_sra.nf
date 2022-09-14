@@ -228,6 +228,11 @@ workflow SRA_PHOENIX {
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
+    //Create JSON of QUAST output
+    JSON_CREATOR (
+        QUAST.out.report_tsv
+    )
+
     if (params.busco_db_path != null) {
         // Checking single copy genes for assembly completeness
         BUSCO (
@@ -351,7 +356,7 @@ workflow SRA_PHOENIX {
     JSON_CREATOR (
         assembly_ratios_ch
     )
-    
+
     // Calculating the assembly ratio
     CALCULATE_ASSEMBLY_RATIO (
         assembly_ratios_ch, params.ncbi_assembly_stats
