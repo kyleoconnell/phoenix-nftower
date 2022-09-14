@@ -293,6 +293,11 @@ workflow PHOENIX_EXQC {
     .join(FORMAT_ANI.out.ani_best_hit.map{        meta, ani_best_hit           -> [[id:meta.id], ani_best_hit ]},  by: [0])\
     .join(KRAKEN2_TRIMD.out.k2_bh_summary.map{    meta, k2_bh_summary          -> [[id:meta.id], k2_bh_summary ]}, by: [0])
 
+    //Create JSON of combined Kranken2 weighted and FASTANI best hits output
+    JSON_CREATOR (
+        best_hit_ch
+    )
+
     // Getting ID from either FastANI or if fails, from Kraken2
     DETERMINE_TAXA_ID (
         best_hit_ch, params.taxa
