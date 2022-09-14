@@ -256,6 +256,11 @@ workflow PHOENIX_EXQC {
     JSON_CREATOR (
         KRAKEN2_WTASMBLD.out.report
     )
+
+    //Create JSON of combined Kranken2 weighted best hit output
+    JSON_CREATOR (
+        KRAKEN2_WTASMBLD.out.k2_bh_summary
+    )
     
     // Running Mash distance to get top 20 matches for fastANI to speed things up
     MASH_DIST (
