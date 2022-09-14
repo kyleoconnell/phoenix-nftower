@@ -221,6 +221,12 @@ workflow PHOENIX_EXQC {
     )
     ch_versions = ch_versions.mix(QUAST.out.versions)
 
+
+    //Create JSON of QUAST output
+    JSON_CREATOR (
+        QUAST.out.report_tsv
+    )
+
     if (params.busco_db_path != null) {
         // Checking single copy genes for assembly completeness
         BUSCO (
