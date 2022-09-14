@@ -259,6 +259,11 @@ workflow SRA_PHOENIX {
     )
     ch_versions = ch_versions.mix(KRAKEN2_WTASMBLD.out.versions)
 
+    //Create JSON of combined Kranken2 weighted output
+    JSON_CREATOR (
+        KRAKEN2_WTASMBLD.out.report
+    )
+
     // Running Mash distance to get top 20 matches for fastANI to speed things up
     MASH_DIST (
         BBMAP_REFORMAT.out.reads, params.mash_sketch
