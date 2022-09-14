@@ -243,6 +243,11 @@ workflow SRA_PHOENIX {
     )
     ch_versions = ch_versions.mix(KRAKEN2_ASMBLD.out.versions)
 
+    //Create JSON of Kraken2 Assembled Report
+    JSON_CREATOR (
+        KRAKEN2_ASMBLD.out.report
+    )
+    
     // Creating krona plots and best hit files for weighted assembly
     KRAKEN2_WTASMBLD (
         BBMAP_REFORMAT.out.reads,"wtasmbld", [], QUAST.out.report_tsv
