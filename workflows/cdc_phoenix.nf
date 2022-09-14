@@ -193,7 +193,7 @@ workflow PHOENIX_EXQC {
     )
     ch_versions = ch_versions.mix(MLST.out.versions)
 
-    //Create JSON of Kraken2 Assembled Report
+    //Create JSON of MLST output
     JSON_CREATOR (
         MLST.out.tsv
     )
