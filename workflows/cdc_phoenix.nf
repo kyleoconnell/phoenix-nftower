@@ -402,6 +402,11 @@ workflow PHOENIX_EXQC {
     )
     ch_versions = ch_versions.mix(GATHER_SUMMARY_LINES.out.versions)
 
+    //Create JSON of Summary output
+    JSON_CREATOR (
+        GATHER_SUMMARY_LINES.out.summary_report
+    )
+    
     // Collecting the software versions
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
