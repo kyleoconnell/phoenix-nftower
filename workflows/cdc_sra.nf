@@ -378,6 +378,11 @@ workflow SRA_PHOENIX {
     failed_summaries_ch         = SPADES_WF.out.line_summary.collect().ifEmpty(params.placeholder)
     summaries_ch                = CREATE_SUMMARY_LINE.out.line_summary.collect()
 
+    //Create JSON of Summary lines
+    JSON_CREATOR (
+        summaries_ch
+    )
+
     // This will check the output directory for an files ending in "_summaryline_failure.tsv" and add them to the output channel
     FETCH_FAILED_SUMMARIES (
         params.outdir, failed_summaries_ch, summaries_ch
