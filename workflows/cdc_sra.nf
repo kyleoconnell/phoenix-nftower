@@ -247,6 +247,12 @@ workflow SRA_PHOENIX {
         ch_versions = ch_versions.mix(BUSCO.out.versions)
     }
 
+    //Create JSON of BUSCO output batch_summary 
+    //short summary has JSON
+    JSON_CREATOR (
+        BUSCO.out.batch_summary
+    )
+
     // Checking for Contamination in assembly creating krona plots and best hit files
     KRAKEN2_ASMBLD (
         BBMAP_REFORMAT.out.reads,"asmbld", [], QUAST.out.report_tsv
