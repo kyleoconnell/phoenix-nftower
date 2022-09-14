@@ -289,6 +289,11 @@ workflow SRA_PHOENIX {
         FASTANI.out.ani
     )
 
+    //Create JSON of formatted ANI output
+    JSON_CREATOR (
+        FORMAT_ANI.out.ani_best_hit
+    )
+
     // Combining weighted kraken report with the FastANI hit based on meta.id
     best_hit_ch = KRAKEN2_WTASMBLD.out.report.map{meta, kraken_weighted_report -> [[id:meta.id], kraken_weighted_report]}\
     .join(FORMAT_ANI.out.ani_best_hit.map{        meta, ani_best_hit           -> [[id:meta.id], ani_best_hit ]},  by: [0])\
