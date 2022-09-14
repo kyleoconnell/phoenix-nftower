@@ -195,7 +195,7 @@ workflow PHOENIX_EXQC {
 
     //Create JSON of Kraken2 Assembled Report
     JSON_CREATOR (
-        MLST.out.report
+        MLST.out.tsv
     )
 
     // Running gamma to identify hypervirulence genes in scaffolds
