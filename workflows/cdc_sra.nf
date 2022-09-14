@@ -347,6 +347,11 @@ workflow SRA_PHOENIX {
     assembly_ratios_ch = DETERMINE_TAXA_ID.out.taxonomy.map{meta, taxonomy   -> [[id:meta.id], taxonomy]}\
     .join(QUAST.out.report_tsv.map{                         meta, report_tsv -> [[id:meta.id], report_tsv]}, by: [0])
 
+    //Create JSON of QUAST w/taxonomy output
+    JSON_CREATOR (
+        assembly_ratios_ch
+    )
+    
     // Calculating the assembly ratio
     CALCULATE_ASSEMBLY_RATIO (
         assembly_ratios_ch, params.ncbi_assembly_stats
