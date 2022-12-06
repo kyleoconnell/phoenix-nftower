@@ -236,9 +236,93 @@ workflow SCAFFOLD_EXTERNAL {
         )
         ch_versions = ch_versions.mix(CALCULATE_ASSEMBLY_RATIO.out.versions)
 
+        GENERATE_PIPELINE_STATS_WF (
         
+            //start changes here
+            FASTP_TRIMD.out.reads, \
+            GATHERING_READ_QC_STATS.out.fastp_raw_qc, \
+            GATHERING_READ_QC_STATS.out.fastp_total_qc, \
+            [], \
+            KRAKEN2_TRIMD.out.report, \
+            KRAKEN2_TRIMD.out.krona_html, \
+            KRAKEN2_TRIMD.out.k2_bh_summary, \
+            //end changes
+            [], \
+            [], \
+            [], \
+            [], \
+            [], \
+            [], \
+            [], \
+            RENAME_FASTA_HEADERS.out.renamed_scaffolds, \
+            BBMAP_REFORMAT.out.filtered_scaffolds, \
+            MLST.out.tsv, \
+            GAMMA_HV.out.gamma, \
+            GAMMA_AR.out.gamma, \
+            GAMMA_PF.out.gamma, \
+            QUAST.out.report_tsv, \
+            [], [], [], [], \
+            KRAKEN2_WTASMBLD.out.report, \
+            KRAKEN2_WTASMBLD.out.krona_html, \
+            KRAKEN2_WTASMBLD.out.k2_bh_summary, \
+            DETERMINE_TAXA_ID.out.taxonomy, \
+            FORMAT_ANI.out.ani_best_hit, \
+            CALCULATE_ASSEMBLY_RATIO.out.ratio, \
+            AMRFINDERPLUS_RUN.out.report, \
+            CALCULATE_ASSEMBLY_RATIO.out.gc_content, \
+            false
+        )
 
-//add generate stats report here
+        // Combining output based on meta.id to create summary by sample -- is this verbose, ugly and annoying? yes, if anyone has a slicker way to do this we welcome the input. 
+        line_summary_ch = MLST.out.tsv.map{                              meta, tsv             -> [[id:meta.id], tsv]},             by: [0])\
+        .join(GAMMA_HV.out.gamma.map{                                    meta, gamma           -> [[id:meta.id], gamma]},           by: [0])\
+        .join(GAMMA_AR.out.gamma.map{                                    meta, gamma           -> [[id:meta.id], gamma]},           by: [0])\
+        .join(GAMMA_PF.out.gamma.map{                                    meta, gamma           -> [[id:meta.id], gamma]},           by: [0])\
+        .join(QUAST.out.report_tsv.map{                                  meta, report_tsv      -> [[id:meta.id], report_tsv]},      by: [0])\
+        .join(CALCULATE_ASSEMBLY_RATIO.out.ratio.map{                    meta, ratio           -> [[id:meta.id], ratio]},           by: [0])\
+        .join(GENERATE_PIPELINE_STATS_WF.out.pipeline_stats.map{         meta, pipeline_stats  -> [[id:meta.id], pipeline_stats]},  by: [0])\
+        .join(DETERMINE_TAXA_ID.out.taxonomy.map{                        meta, taxonomy        -> [[id:meta.id], taxonomy]},        by: [0])\
+        //.join(KRAKEN2_TRIMD.out.k2_bh_summary.map{                       meta, k2_bh_summary   -> [[id:meta.id], k2_bh_summary]},   by: [0])\
+        .join(AMRFINDERPLUS_RUN.out.report.map{                          meta, report          -> [[id:meta.id], report]}, by: [0])
+
+        // Generate summary per sample that passed SPAdes
+        CREATE_SUMMARY_LINE(
+            line_summary_ch
+        )
+        ch_versions = ch_versions.mix(CREATE_SUMMARY_LINE.out.versions)
+
+        // Collect all the summary files prior to fetch step to force the fetch process to wait
+        summaries_ch                = CREATE_SUMMARY_LINE.out.line_summary.collect()
+
+        // Combining sample summaries into final report
+        GATHER_SUMMARY_LINES (
+            all_summaries_ch, false
+        )
+        ch_versions = ch_versions.mix(GATHER_SUMMARY_LINES.out.versions)
+
+        // Collecting the software versions
+        CUSTOM_DUMPSOFTWAREVERSIONS (
+            ch_versions.unique().collectFile(name: 'collated_versions.yml')
+        )
+
+        //
+        // MODULE: MultiQC
+        //
+        workflow_summary    = WorkflowPhoenix.paramsSummaryMultiqc(workflow, summary_params)
+        ch_workflow_summary = Channel.value(workflow_summary)
+
+        ch_multiqc_files = Channel.empty()
+        ch_multiqc_files = ch_multiqc_files.mix(Channel.from(ch_multiqc_config))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_multiqc_custom_config.collect().ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
+        ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
+
+        MULTIQC (
+            ch_multiqc_files.collect()
+        )
+        multiqc_report = MULTIQC.out.report.toList()
+        ch_versions    = ch_versions.mix(MULTIQC.out.versions)
+
 }
 
 /*
