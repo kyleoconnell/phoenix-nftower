@@ -1,0 +1,6 @@
+Scaffolds files should be save in this folder when using the scaffolds entry point.
+You will need to add the name of the sample, for each scaffolds file to be run, to the samplesheet, scaffolds_list.csv, which is found in the assets folder.
+Press 'ENTER' or 'RETURN' then type in each additional sample name on the next line to add additional samples to your list.
+Your final listed sample should NOT be followed by a blank, new line.
+Do NOT add spaces or any other characters before or after each sample name!
+Please delete your saved scaffolds files once you've verified that your analysis was completed on all samples.
