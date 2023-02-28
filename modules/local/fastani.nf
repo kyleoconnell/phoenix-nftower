@@ -25,7 +25,6 @@ process FASTANI {
         -q $query \\
         --rl $reference \\
         -o ${prefix}.ani.txt
-
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         fastani: \$(fastANI --version 2>&1 | sed 's/version//;')
